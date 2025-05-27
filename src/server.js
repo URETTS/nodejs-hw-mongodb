@@ -2,6 +2,7 @@ import express from 'express';
 import pino from 'pino-http';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import contactsRouter from './routes/contactsRouter.js';
 
 dotenv.config();
 
@@ -9,6 +10,9 @@ const PORT = process.env.PORT;
 
 export const startServer = () => {
     const app = express();
+
+    app.use('/contacts', contactsRouter);
+    app.use('/contacts', contactsRouter);
 
     app.use(express.json());
   app.use(cors());
