@@ -11,8 +11,6 @@ const PORT = process.env.PORT;
 export const startServer = () => {
     const app = express();
 
-    app.use('/contacts', contactsRouter);
-    app.use('/contacts', contactsRouter);
 
     app.use(express.json());
   app.use(cors());
@@ -24,6 +22,8 @@ export const startServer = () => {
       },
     }),
   );
+
+  app.use('/students', contactsRouter);
     
   app.use( (req, res) => {
     res.status(404).json({ message: 'Not found' });
