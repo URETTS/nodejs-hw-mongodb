@@ -19,3 +19,7 @@ export const updateContact = async (id, data) => {
 export const deleteContact = async (id) => {
   return await Contact.findByIdAndDelete(id);
 };
+
+export const patchContact = async (id, data) => {
+  return await Contact.findByIdAndUpdate(id, data, { new: true });
+};

@@ -5,6 +5,7 @@ import {
   createContact,
   updateContact,
   deleteContact,
+  patchContact,
 } from '../services/contacts.js';
 
 export const handleGetAllContacts = async (req, res, next) => {
@@ -42,10 +43,24 @@ export const handleGetContactById = async (req, res, next) => {
 
 export const handleCreateContact = async (req, res, next) => {
   try {
-    const contact = await createContact(req.body);
+    const { name, phoneNumber, contactType, email, isFavourite } = req.body;
+
+    
+    if (!name || !phoneNumber || !contactType) {
+      throw createError(400, 'Missing required fields: name, phoneNumber, and contactType are required');
+    }
+
+    
+    const newContactData = { name, phoneNumber, contactType };
+
+    if (email) newContactData.email = email;
+    if (typeof isFavourite !== 'undefined') newContactData.isFavourite = isFavourite;
+
+    const contact = await createContact(newContactData);
+
     res.status(201).json({
       status: 201,
-      message: 'Contact created successfully!',
+      message: 'Successfully created a contact!',
       data: contact,
     });
   } catch (err) {
@@ -85,6 +100,31 @@ export const handleDeleteContact = async (req, res, next) => {
       status: 200,
       message: 'Contact deleted successfully!',
       data: deletedContact,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const handlePatchContact = async (req, res, next) => {
+  try {
+    const { contactId } = req.params;
+    const patchData = req.body;
+
+    if (!Object.keys(patchData).length) {
+      throw createError(400, 'Missing fields to update');
+    }
+
+    const updatedContact = await patchContact(contactId, patchData);
+
+    if (!updatedContact) {
+      throw createError(404, 'Contact not found');
+    }
+
+    res.status(200).json({
+      status: 200,
+      message: 'Successfully patched a contact!',
+      data: updatedContact,
     });
   } catch (err) {
     next(err);
