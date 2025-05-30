@@ -76,11 +76,7 @@ export const handleDeleteContact = async (req, res) => {
     throw createError(404, 'Contact not found');
   }
 
-  res.status(200).json({
-    status: 200,
-    message: 'Contact deleted successfully!',
-    data: deletedContact,
-  });
+  res.status(204).end();
 };
 
 export const handlePatchContact = async (req, res) => {
