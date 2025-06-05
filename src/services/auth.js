@@ -78,3 +78,48 @@ export const registerUser = async (userData) => {
 
   return newUser;
 };
+
+const createTokens = (userId) => {
+  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  const refreshToken = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+  const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000);
+  const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+  return {
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil,
+    refreshTokenValidUntil,
+  };
+};
+
+// Оновлення сесії
+export const refreshSession = async (refreshToken) => {
+  if (!refreshToken) throw createError(401, 'No refresh token');
+
+  const existingSession = await Session.findOne({ refreshToken });
+  if (!existingSession) throw createError(401, 'Invalid session');
+
+  const payload = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
+  await Session.deleteOne({ _id: existingSession._id });
+
+  const tokens = createTokens(payload.userId);
+
+  await Session.create({
+    userId: payload.userId,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+    accessTokenValidUntil: tokens.accessTokenValidUntil,
+    refreshTokenValidUntil: tokens.refreshTokenValidUntil,
+  });
+
+  return { accessToken: tokens.accessToken };
+};
+
+// Видалення сесії
+export const logoutUser = async (refreshToken) => {
+  if (!refreshToken) return;
+  await Session.findOneAndDelete({ refreshToken });
+};

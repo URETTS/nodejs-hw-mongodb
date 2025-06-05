@@ -6,6 +6,7 @@ import contactsRouter from './routes/contactsRouter.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import authRouter from './routes/auth.js';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -30,6 +31,8 @@ export const startServer = () => {
   app.use('/auth', authRouter);
   
   app.use("/auth", authRouter);
+  
+  app.use(cookieParser());
 
   app.use(notFoundHandler);
 
