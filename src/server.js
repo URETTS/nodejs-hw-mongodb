@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import contactsRouter from './routes/contactsRouter.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import authRouter from './routes/auth.js';
 
 dotenv.config();
 
@@ -26,9 +27,14 @@ export const startServer = () => {
 
   app.use('/contacts', contactsRouter);
 
+  app.use('/auth', authRouter);
+  
+  app.use("/auth", authRouter);
+
   app.use(notFoundHandler);
 
   app.use(errorHandler);
+
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
