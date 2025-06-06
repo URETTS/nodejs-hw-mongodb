@@ -16,6 +16,7 @@ export const startServer = () => {
   const app = express();
 
   app.use(express.json());
+  app.use(cookieParser());
   app.use(cors());
 
   app.use(
@@ -31,12 +32,11 @@ export const startServer = () => {
   app.use('/auth', authRouter);
   
   app.use("/auth", authRouter);
-  
-  app.use(cookieParser());
 
   app.use(notFoundHandler);
 
   app.use(errorHandler);
+  
 
 
   app.listen(PORT, () => {
