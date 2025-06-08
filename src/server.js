@@ -31,11 +31,12 @@ export const startServer = () => {
 
   app.use('/auth', authRouter);
 
-  app.use(notFoundHandler);
-
   app.get('/', (req, res) => {
     res.send('API is working');
   });
+
+  app.use(notFoundHandler);
+
 
   app.use(errorHandler);
   
