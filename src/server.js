@@ -33,6 +33,10 @@ export const startServer = () => {
 
   app.use(notFoundHandler);
 
+  app.get('/', (req, res) => {
+    res.send('API is working');
+  });
+
   app.use(errorHandler);
   
 
