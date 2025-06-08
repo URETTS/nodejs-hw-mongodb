@@ -6,16 +6,18 @@ export const getAllContacts = async (
   sortBy = 'name',
   sortOrder = 'asc',
   type,
-  isFavourite
+  isFavourite,
+  userId
 ) => {
   const skip = (page - 1) * perPage;
-
   const sortDirection = sortOrder === 'desc' ? -1 : 1;
   const sortOptions = { [sortBy]: sortDirection };
 
-  const filter = {};
+  const filter = { userId }; 
   if (type) filter.contactType = type;
-  if (typeof isFavourite !== 'undefined') filter.isFavourite = isFavourite === 'true';
+  if (typeof isFavourite !== 'undefined') {
+    filter.isFavourite = isFavourite === 'true';
+  }
 
   const [contacts, totalItems] = await Promise.all([
     Contact.find(filter).sort(sortOptions).skip(skip).limit(perPage),
@@ -35,24 +37,22 @@ export const getAllContacts = async (
   };
 };
 
-
-
-export const getContactById = async (id) => {
-  return await Contact.findById(id);
+export const getContactById = async (id, userId) => {
+  return await Contact.findOne({ _id: id, userId });
 };
 
 export const createContact = async (data) => {
   return await Contact.create(data);
 };
 
-export const updateContact = async (id, data) => {
-  return await Contact.findByIdAndUpdate(id, data, { new: true });
+export const updateContact = async (id, userId, data) => {
+  return await Contact.findOneAndUpdate({ _id: id, userId }, data, { new: true });
 };
 
-export const deleteContact = async (id) => {
-  return await Contact.findByIdAndDelete(id);
+export const deleteContact = async (id, userId) => {
+  return await Contact.findOneAndDelete({ _id: id, userId });
 };
 
-export const patchContact = async (id, data) => {
-  return await Contact.findByIdAndUpdate(id, data, { new: true });
+export const patchContact = async (id, userId, data) => {
+  return await Contact.findOneAndUpdate({ _id: id, userId }, data, { new: true });
 };
