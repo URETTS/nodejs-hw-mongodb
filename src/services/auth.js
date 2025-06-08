@@ -4,25 +4,24 @@ import { User } from '../ models/userModel.js';
 import createError from 'http-errors';
 import bcrypt from 'bcrypt';
 
+
 const ACCESS_TOKEN_EXPIRES_IN = '15m';
 const REFRESH_TOKEN_EXPIRES_IN = '30d';
 
 // Генерация токенов
-const createTokens = (userId) => {
-  const accessToken = jwt.sign(
-    { userId },
-    process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
-  );
+const createTokens = ({ id, sessionId }) => {
+  const payload = { id, sessionId };
 
-  const refreshToken = jwt.sign(
-    { userId },
-    process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
-  );
+  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+  });
 
-  const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 минут
-  const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 дней
+  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+  });
+
+  const accessTokenValidUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 хв
+  const refreshTokenValidUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 днів
 
   return {
     accessToken,
@@ -31,6 +30,7 @@ const createTokens = (userId) => {
     refreshTokenValidUntil,
   };
 };
+
 
 // РЕГИСТРАЦИЯ
 export const registerUser = async (userData) => {
@@ -52,79 +52,109 @@ export const registerUser = async (userData) => {
   return newUser;
 };
 
-// ЛОГИН
 export const loginUser = async (email, password, res) => {
   const user = await User.findOne({ email });
+
   if (!user) {
-    throw createError(401, 'Invalid email or password');
+    throw createError(401, 'Email or password is incorrect');
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw createError(401, 'Invalid email or password');
+    throw createError(401, 'Email or password is incorrect');
   }
 
-  // Удаляем предыдущую сессию
-  await Session.deleteOne({ userId: user._id });
+  const session = await Session.create({ userId: user._id });
 
-  // Создаем новые токены
-  const tokens = createTokens(user._id);
+  const payload = {
+    id: user._id,
+    sessionId: session._id,
+  };
 
-  // Создаем сессию
-  await Session.create({
-    userId: user._id,
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    accessTokenValidUntil: tokens.accessTokenValidUntil,
-    refreshTokenValidUntil: tokens.refreshTokenValidUntil,
-  });
+  const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 
-  // Устанавливаем refresh токен в cookie
-  res.cookie('refreshToken', tokens.refreshToken, {
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
+
+  
+  res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    expires: tokens.refreshTokenValidUntil,
+    secure: true,
+    sameSite: 'None',
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
   });
 
-  return { accessToken: tokens.accessToken };
+  res.cookie('sessionId', session._id.toString(), {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'None',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return { accessToken };
 };
 
 // ОБНОВЛЕНИЕ СЕССИИ
-export const refreshSession = async (refreshToken, res) => {
-  if (!refreshToken) throw createError(401, 'No refresh token');
+export const refreshSession = async (refreshToken, sessionId, res) => {
+  if (!refreshToken || !sessionId) throw createError(401, 'Missing refresh token or session ID');
 
-  const existingSession = await Session.findOne({ refreshToken });
-  if (!existingSession) throw createError(401, 'Invalid session');
+  let payload;
+  try {
+    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  } catch  {
+    throw createError(401, 'Invalid or expired refresh token');
+  }
 
-  // Проверяем refresh токен с актуальным секретом
-  const payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  if (payload.sessionId !== sessionId) {
+    throw createError(401, 'Session ID mismatch');
+  }
 
-  await Session.deleteOne({ _id: existingSession._id });
+  const existingSession = await Session.findById(sessionId);
+  if (!existingSession) {
+    throw createError(401, 'Session not found');
+  }
 
-  const tokens = createTokens(payload.userId);
+  await Session.deleteOne({ _id: sessionId });
+
+  const tokens = createTokens({ id: payload.id, sessionId });
 
   await Session.create({
-    userId: payload.userId,
+    _id: sessionId,
+    userId: payload.id,
     accessToken: tokens.accessToken,
     refreshToken: tokens.refreshToken,
     accessTokenValidUntil: tokens.accessTokenValidUntil,
     refreshTokenValidUntil: tokens.refreshTokenValidUntil,
   });
 
-  // Обновляем куку с refresh токеном
   res.cookie('refreshToken', tokens.refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true,
+    sameSite: 'None',
     expires: tokens.refreshTokenValidUntil,
   });
 
   return { accessToken: tokens.accessToken };
 };
 
+
 // ЛОГАУТ
-export const logoutUser = async (refreshToken) => {
+export const logoutUser = async (refreshToken, res) => {
   if (!refreshToken) return;
+
+  // Видалити сесію з бази
   await Session.findOneAndDelete({ refreshToken });
+
+  // Очистити кукі
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'None',
+  });
+
+  res.clearCookie('sessionId', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'None',
+  });
 };
+

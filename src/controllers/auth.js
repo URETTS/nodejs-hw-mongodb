@@ -1,4 +1,6 @@
-import { registerUser, loginUser ,refreshSession, logoutUser  } from '../services/auth.js';
+import { registerUser, loginUser, refreshSession, logoutUser } from '../services/auth.js';
+import createError from 'http-errors';
+
 
 export const handleRegister = async (req, res) => {
   const user = await registerUser(req.body);
@@ -32,7 +34,14 @@ export const handleLogin = async (req, res) => {
 
 export const handleRefresh = async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
-  const { accessToken } = await refreshSession(refreshToken);
+  const sessionId = req.cookies?.sessionId;
+  
+  if (!refreshToken || !sessionId) {
+    throw createError(401, 'Missing refresh token or session ID');
+  }
+  
+  const { accessToken } = await refreshSession(refreshToken, sessionId, res);
+  
 
   res.status(200).json({
     status: 200,
@@ -43,8 +52,9 @@ export const handleRefresh = async (req, res) => {
   });
 };
 
+
 export const handleLogout = async (req, res) => {
   const refreshToken = req.cookies?.refreshToken;
-  await logoutUser(refreshToken);
-  res.status(204).end();
+  await logoutUser(refreshToken, res);
+  res.status(204).end(); 
 };
