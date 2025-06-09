@@ -3,6 +3,8 @@ import { Session } from '../ models/sessionModel.js';
 import { User } from '../ models/userModel.js';
 import createError from 'http-errors';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
+
 
 
 const ACCESS_TOKEN_EXPIRES_IN = '15m';
@@ -12,11 +14,11 @@ const REFRESH_TOKEN_EXPIRES_IN = '30d';
 const createTokens = ({ id, sessionId }) => {
   const payload = { id, sessionId };
 
-  const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
+  const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: ACCESS_TOKEN_EXPIRES_IN,
   });
 
-  const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, {
+  const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
   });
 
@@ -64,33 +66,37 @@ export const loginUser = async (email, password, res) => {
     throw createError(401, 'Email or password is incorrect');
   }
 
-  const session = await Session.create({ userId: user._id });
+  // Створюємо попередньо sessionId (для включення його в токени)
+const sessionId = new mongoose.Types.ObjectId();
 
-  const payload = {
-    id: user._id,
-    sessionId: session._id,
-  };
+const tokens = createTokens({ id: user._id, sessionId });
 
-  const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+await Session.create({
+  _id: sessionId,
+  userId: user._id,
+  accessToken: tokens.accessToken,
+  refreshToken: tokens.refreshToken,
+  accessTokenValidUntil: tokens.accessTokenValidUntil,
+  refreshTokenValidUntil: tokens.refreshTokenValidUntil,
+});
 
-  const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
 
-  
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'None',
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
-  });
+res.cookie('refreshToken', tokens.refreshToken, {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'None',
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+});
 
-  res.cookie('sessionId', session._id.toString(), {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'None',
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
+res.cookie('sessionId', sessionId.toString(), {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'None',
+  maxAge: 30 * 24 * 60 * 60 * 1000,
+});
 
-  return { accessToken };
+return { accessToken: tokens.accessToken };
+
 };
 
 // ОБНОВЛЕНИЕ СЕССИИ
@@ -99,7 +105,7 @@ export const refreshSession = async (refreshToken, sessionId, res) => {
 
   let payload;
   try {
-    payload = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    payload = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
   } catch  {
     throw createError(401, 'Invalid or expired refresh token');
   }
