@@ -20,8 +20,17 @@ export const handleGetAllContacts = async (req, res) => {
 
   const parsedPage = parseInt(page, 10);
   const parsedPerPage = parseInt(perPage, 10);
+  const { _id: userId } = req.user;
 
-  const result = await getAllContacts(parsedPage, parsedPerPage, sortBy, sortOrder, type, isFavourite);
+  const result = await getAllContacts(
+    parsedPage,
+    parsedPerPage,
+    sortBy,
+    sortOrder,
+    type,
+    isFavourite,
+    userId
+  );
 
   res.status(200).json({
     status: 200,
@@ -30,11 +39,11 @@ export const handleGetAllContacts = async (req, res) => {
   });
 };
 
-
-
 export const handleGetContactById = async (req, res) => {
   const { contactId } = req.params;
-  const contact = await getContactById(contactId);
+  const { _id: userId } = req.user;
+
+  const contact = await getContactById(contactId, userId);
 
   if (!contact) {
     throw createError(404, 'Contact not found');
@@ -49,12 +58,18 @@ export const handleGetContactById = async (req, res) => {
 
 export const handleCreateContact = async (req, res) => {
   const { name, phoneNumber, contactType, email, isFavourite } = req.body;
+  const { _id: userId } = req.user;
 
   if (!name || !phoneNumber || !contactType) {
     throw createError(400, 'Missing required fields: name, phoneNumber, and contactType are required');
   }
 
-  const newContactData = { name, phoneNumber, contactType };
+  const newContactData = {
+    name,
+    phoneNumber,
+    contactType,
+    userId,
+  };
 
   if (email) newContactData.email = email;
   if (typeof isFavourite !== 'undefined') newContactData.isFavourite = isFavourite;
@@ -70,7 +85,9 @@ export const handleCreateContact = async (req, res) => {
 
 export const handleUpdateContact = async (req, res) => {
   const { contactId } = req.params;
-  const updatedContact = await updateContact(contactId, req.body);
+  const { _id: userId } = req.user;
+
+  const updatedContact = await updateContact(contactId, req.body, userId);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
@@ -85,7 +102,9 @@ export const handleUpdateContact = async (req, res) => {
 
 export const handleDeleteContact = async (req, res) => {
   const { contactId } = req.params;
-  const deletedContact = await deleteContact(contactId);
+  const { _id: userId } = req.user;
+
+  const deletedContact = await deleteContact(contactId, userId);
 
   if (!deletedContact) {
     throw createError(404, 'Contact not found');
@@ -97,12 +116,13 @@ export const handleDeleteContact = async (req, res) => {
 export const handlePatchContact = async (req, res) => {
   const { contactId } = req.params;
   const patchData = req.body;
+  const { _id: userId } = req.user;
 
   if (!Object.keys(patchData).length) {
     throw createError(400, 'Missing fields to update');
   }
 
-  const updatedContact = await patchContact(contactId, patchData);
+  const updatedContact = await patchContact(contactId, patchData, userId);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
