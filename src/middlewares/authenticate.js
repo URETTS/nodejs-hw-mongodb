@@ -27,7 +27,7 @@ export const authenticate = async (req, res, next) => {
       throw createError(401, 'Session not found');
     }
 
-    const user = await User.findById(payload.userId);
+    const user = await User.findById(payload.id);
     if (!user) {
       throw createError(401, 'User not found');
     }

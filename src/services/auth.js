@@ -119,18 +119,14 @@ export const refreshSession = async (refreshToken, sessionId, res) => {
     throw createError(401, 'Session not found');
   }
 
-  await Session.deleteOne({ _id: sessionId });
-
   const tokens = createTokens({ id: payload.id, sessionId });
 
-  await Session.create({
-    _id: sessionId,
-    userId: payload.id,
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    accessTokenValidUntil: tokens.accessTokenValidUntil,
-    refreshTokenValidUntil: tokens.refreshTokenValidUntil,
-  });
+existingSession.accessToken = tokens.accessToken;
+existingSession.refreshToken = tokens.refreshToken;
+existingSession.accessTokenValidUntil = tokens.accessTokenValidUntil;
+existingSession.refreshTokenValidUntil = tokens.refreshTokenValidUntil;
+
+await existingSession.save();
 
   res.cookie('refreshToken', tokens.refreshToken, {
     httpOnly: true,
