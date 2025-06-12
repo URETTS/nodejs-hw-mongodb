@@ -7,6 +7,7 @@ import {
   deleteContact,
   patchContact,
 } from '../services/contacts.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 export const handleGetAllContacts = async (req, res) => {
   const {
@@ -64,13 +65,21 @@ export const handleCreateContact = async (req, res) => {
     throw createError(400, 'Missing required fields: name, phoneNumber, and contactType are required');
   }
 
+  let photoUrl = null;
+
+  if (req.file) {
+    const result = await uploadToCloudinary(req.file.buffer);
+    photoUrl = result.secure_url;
+  }
+  
   const newContactData = {
     name,
     phoneNumber,
     contactType,
     userId,
+    photo: photoUrl,
   };
-
+  
   if (email) newContactData.email = email;
   if (typeof isFavourite !== 'undefined') newContactData.isFavourite = isFavourite;
 
@@ -126,6 +135,10 @@ export const handlePatchContact = async (req, res) => {
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
+  }
+  if (req.file) {
+    const result = await uploadToCloudinary(req.file.buffer);
+    patchData.photo = result.secure_url;
   }
 
   res.status(200).json({
