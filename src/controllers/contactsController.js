@@ -124,21 +124,22 @@ export const handleDeleteContact = async (req, res) => {
 
 export const handlePatchContact = async (req, res) => {
   const { contactId } = req.params;
-  const patchData = req.body;
   const { _id: userId } = req.user;
+  const patchData = { ...req.body }; 
 
-  if (!Object.keys(patchData).length) {
+  if (!Object.keys(patchData).length && !req.file) {
     throw createError(400, 'Missing fields to update');
   }
 
-  const updatedContact = await patchContact(contactId, patchData, userId);
-
-  if (!updatedContact) {
-    throw createError(404, 'Contact not found');
-  }
   if (req.file) {
     const result = await uploadToCloudinary(req.file.buffer);
     patchData.photo = result.secure_url;
+  }
+
+  const updatedContact = await patchContact(contactId, userId, patchData);
+
+  if (!updatedContact) {
+    throw createError(404, 'Contact not found');
   }
 
   res.status(200).json({
@@ -147,3 +148,4 @@ export const handlePatchContact = async (req, res) => {
     data: updatedContact,
   });
 };
+
