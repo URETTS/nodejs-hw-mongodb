@@ -7,6 +7,7 @@ import {
   deleteContact,
   patchContact,
 } from '../services/contacts.js';
+import { uploadToCloudinary } from '../utils/cloudinary.js';
 
 export const handleGetAllContacts = async (req, res) => {
   const {
@@ -64,13 +65,21 @@ export const handleCreateContact = async (req, res) => {
     throw createError(400, 'Missing required fields: name, phoneNumber, and contactType are required');
   }
 
+  let photoUrl = null;
+
+  if (req.file) {
+    const result = await uploadToCloudinary(req.file.buffer);
+    photoUrl = result.secure_url;
+  }
+  
   const newContactData = {
     name,
     phoneNumber,
     contactType,
     userId,
+    photo: photoUrl,
   };
-
+  
   if (email) newContactData.email = email;
   if (typeof isFavourite !== 'undefined') newContactData.isFavourite = isFavourite;
 
@@ -115,14 +124,19 @@ export const handleDeleteContact = async (req, res) => {
 
 export const handlePatchContact = async (req, res) => {
   const { contactId } = req.params;
-  const patchData = req.body;
   const { _id: userId } = req.user;
+  const patchData = { ...req.body }; 
 
-  if (!Object.keys(patchData).length) {
+  if (!Object.keys(patchData).length && !req.file) {
     throw createError(400, 'Missing fields to update');
   }
 
-  const updatedContact = await patchContact(contactId, patchData, userId);
+  if (req.file) {
+    const result = await uploadToCloudinary(req.file.buffer);
+    patchData.photo = result.secure_url;
+  }
+
+  const updatedContact = await patchContact(contactId, userId, patchData);
 
   if (!updatedContact) {
     throw createError(404, 'Contact not found');
@@ -134,3 +148,4 @@ export const handlePatchContact = async (req, res) => {
     data: updatedContact,
   });
 };
+
