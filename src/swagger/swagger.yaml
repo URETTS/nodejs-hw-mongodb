@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Contacts API
+  version: 1.0.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  description: API для керування контактами
+
+servers:
+  - url: https://your-deployed-site.com
+
+paths:
+  /contacts/{contactId}:
+    $ref: ./paths/contacts/{id}/get.yaml
+
+components:
+  schemas:
+    Contact:
+      $ref: ./components/schemas/Contact.yaml
+    Error:
+      $ref: ./components/schemas/Error.yaml
+  responses:
+    NotFound:
+      $ref: ./components/responses/NotFound.yaml
+    ValidationError:
+      $ref: ./components/responses/ValidationError.yaml
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

@@ -1,0 +1,23 @@
+type: object
+properties:
+  _id:
+    type: string
+  name:
+    type: string
+  phoneNumber:
+    type: string
+  email:
+    type: string
+  contactType:
+    type: string
+  isFavourite:
+    type: boolean
+  photo:
+    type: string
+    format: uri
+  userId:
+    type: string
+required:
+  - name
+  - phoneNumber
+  - contactType
