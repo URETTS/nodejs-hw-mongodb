@@ -1,0 +1,34 @@
+get:
+  tags:
+    - Contacts
+  summary: Отримати всі контакти
+  operationId: getContacts
+  description: Повертає список усіх контактів користувача
+  security:
+    - bearerAuth: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+    - in: query
+      name: perPage
+      schema:
+        type: integer
+    - in: query
+      name: sortBy
+      schema:
+        type: string
+    - in: query
+      name: sortOrder
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Список контактів
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../components/schemas/Contact.yaml'

@@ -1,5 +1,8 @@
-description: Дані не валідні
+description: Validation error
 content:
   application/json:
     schema:
-      $ref: '../schemas/Error.yaml'
+      type: object
+      properties:
+        message:
+          type: string

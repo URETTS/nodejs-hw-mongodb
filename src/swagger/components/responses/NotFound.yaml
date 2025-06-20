@@ -1,5 +1,8 @@
-description: Контакт не знайдено
+description: Contact not found
 content:
   application/json:
     schema:
-      $ref: '../schemas/Error.yaml'
+      type: object
+      properties:
+        message:
+          type: string

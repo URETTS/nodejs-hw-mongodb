@@ -2,30 +2,35 @@ openapi: 3.0.0
 info:
   title: Contacts API
   version: 1.0.0
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
-  description: API для керування контактами
-
 servers:
-  - url: https://your-deployed-site.com
-
+  - url: https://nodejs-hw-mongodb-qrqo.onrender.com
 paths:
+  /contacts:
+    get:
+      $ref: './paths/contacts/get.yaml'
+    post:
+      $ref: './paths/contacts/post.yaml'
   /contacts/{contactId}:
-    $ref: ./paths/contacts/{id}/get.yaml
-
+    get:
+      $ref: './paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: './paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: './paths/contacts/{id}/delete.yaml'
 components:
-  schemas:
-    Contact:
-      $ref: ./components/schemas/Contact.yaml
-    Error:
-      $ref: ./components/schemas/Error.yaml
-  responses:
-    NotFound:
-      $ref: ./components/responses/NotFound.yaml
-    ValidationError:
-      $ref: ./components/responses/ValidationError.yaml
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
+  schemas:
+    Contact:
+      $ref: './components/schemas/Contact.yaml'
+    CreateContactRequest:
+      $ref: './components/schemas/CreateContactRequest.yaml'
+  responses:
+    NotFound:
+      $ref: './components/responses/NotFound.yaml'
+    ValidationError:
+      $ref: './components/responses/ValidationError.yaml'
+security:
+  - bearerAuth: []

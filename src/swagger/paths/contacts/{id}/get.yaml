@@ -1,30 +1,23 @@
 get:
   tags:
     - Contacts
-  summary: Отримати контакт за ID
+  summary: Get contact by ID
   operationId: getContactById
-  description: |
-    Цей ендпоінт дозволяє авторизованому користувачу отримати інформацію про конкретний контакт за його ID.
+  description: Returns a contact by its ID
   security:
     - bearerAuth: []
   parameters:
-    - name: contactId
-      in: path
+    - in: path
+      name: contactId
       required: true
-      description: Унікальний ідентифікатор контакту
       schema:
         type: string
-        example: '6654a33aa1d97be0dc87f624'
   responses:
     '200':
-      description: Контакт знайдено успішно
+      description: Contact found
       content:
         application/json:
           schema:
-            $ref: ../../../components/schemas/Contact.yaml
+            $ref: '../../../components/schemas/Contact.yaml'
     '404':
-      description: Контакт не знайдено
-      content:
-        application/json:
-          schema:
-            $ref: ../../../components/schemas/Error.yaml
+      $ref: '../../../components/responses/NotFound.yaml'

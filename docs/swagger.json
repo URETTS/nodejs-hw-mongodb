@@ -2,12 +2,12 @@
   "openapi": "3.1.0",
   "info": {
     "version": "1.0.0",
-    "title": "<дз 8>",
+    "title": "дз 8",
     "license": {
       "name": "Apache 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
     },
-    "description": "<тут я делаю дз 8>"
+    "description": "тут я делаю дз 8"
   },
   "servers": [
     {
@@ -17,7 +17,16 @@
       "url": "https://nodejs-hw-mongodb-qrqo.onrender.com"
     }
   ],
-  "tags": null,
+  "tags": [
+    {
+      "name": "Contacts",
+      "description": "Операції над контактами"
+    },
+    {
+      "name": "Auth",
+      "description": "Авторизація та реєстрація"
+    }
+  ],
   "paths": null,
   "components": {
     "securitySchemes": {
