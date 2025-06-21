@@ -1,23 +1,22 @@
-post:
-  tags:
-    - Contacts
-  summary: Створити новий контакт
-  operationId: createContact
-  description: Створює новий контакт
-  security:
-    - bearerAuth: []
-  requestBody:
-    required: true
+tags:
+  - Contacts
+summary: Створити новий контакт
+operationId: createContact
+description: Створює новий контакт
+security:
+  - bearerAuth: []
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../../components/schemas/CreateContactRequest.yaml'
+responses:
+  '201':
+    description: Контакт створено
     content:
       application/json:
         schema:
-          $ref: '../../components/schemas/CreateContactRequest.yaml'
-  responses:
-    '201':
-      description: Контакт створено
-      content:
-        application/json:
-          schema:
-            $ref: '../../components/schemas/Contact.yaml'
-    '400':
-      $ref: '../../components/responses/ValidationError.yaml'
+          $ref: '../../components/schemas/Contact.yaml'
+  '400':
+    $ref: '../../components/responses/ValidationError.yaml'

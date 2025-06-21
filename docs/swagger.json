@@ -27,7 +27,7 @@
       "description": "Авторизація та реєстрація"
     }
   ],
-  "paths": null,
+  "paths": {},
   "components": {
     "securitySchemes": {
       "bearerAuth": {

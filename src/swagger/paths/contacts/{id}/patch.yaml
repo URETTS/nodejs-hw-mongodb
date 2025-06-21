@@ -1,31 +1,30 @@
-patch:
-  tags:
-    - Contacts
-  summary: Оновити контакт
-  operationId: updateContact
-  description: Оновлює контакт за ID
-  security:
-    - bearerAuth: []
-  parameters:
-    - in: path
-      name: contactId
-      required: true
-      schema:
-        type: string
-  requestBody:
+tags:
+  - Contacts
+summary: Оновити контакт
+operationId: updateContact
+description: Оновлює контакт за ID
+security:
+  - bearerAuth: []
+parameters:
+  - in: path
+    name: contactId
     required: true
+    schema:
+      type: string
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../../../components/schemas/CreateContactRequest.yaml'
+responses:
+  '200':
+    description: Контакт оновлено
     content:
       application/json:
         schema:
-          $ref: '../../../components/schemas/CreateContactRequest.yaml'
-  responses:
-    '200':
-      description: Контакт оновлено
-      content:
-        application/json:
-          schema:
-            $ref: '../../../components/schemas/Contact.yaml'
-    '400':
-      $ref: '../../../components/responses/ValidationError.yaml'
-    '404':
-      $ref: '../../../components/responses/NotFound.yaml'
+          $ref: '../../../components/schemas/Contact.yaml'
+  '400':
+    $ref: '../../../components/responses/ValidationError.yaml'
+  '404':
+    $ref: '../../../components/responses/NotFound.yaml'
