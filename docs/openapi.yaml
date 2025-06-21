@@ -1,11 +1,11 @@
 openapi: 3.1.0
 info:
   version: 1.0.0
-  title: дз 8
+  title: дз 7
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  description: тут я делаю дз 8
+  description: тут я делаю дз 7
 
 tags:
   - name: Contacts
@@ -14,28 +14,22 @@ tags:
     description: Авторизація та реєстрація
 
 servers:
+  - url: http://localhost:3000
   - url: https://nodejs-hw-mongodb-qrqo.onrender.com
 
 paths:
   /contacts:
     get:
-      tags:
-        - Contacts
-      summary: Отримати всі контакти
-      operationId: getAllContacts
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Успішна відповідь
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-        '401':
-          description: Неавторизовано
+      $ref: '../src/swagger/paths/contacts/get.yaml'
+    post:
+      $ref: '../src/swagger/paths/contacts/post.yaml'
+  /contacts/{contactId}:
+    get:
+      $ref: '../src/swagger/paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: '../src/swagger/paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: '../src/swagger/paths/contacts/{id}/delete.yaml'
 
 components:
   securitySchemes:
