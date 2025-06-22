@@ -12,7 +12,7 @@ parameters:
     schema:
       type: string
 responses:
-  '200':
-    description: Contact deleted
+  '204':
+    description: Contact successfully deleted. No content is returned.
   '404':
     $ref: '../../../components/responses/NotFound.yaml'

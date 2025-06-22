@@ -112,9 +112,8 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Створити новий контакт",
+        "summary": "Create a new contact",
         "operationId": "createContact",
-        "description": "Створює новий контакт",
         "security": [
           {
             "bearerAuth": []
@@ -123,26 +122,79 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateContactRequest"
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Contact's name"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "Contact's phone number"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Contact's email"
+                  },
+                  "isFavourite": {
+                    "type": "boolean",
+                    "description": "Is contact favourite"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ],
+                    "description": "Type of contact"
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Contact's photo file"
+                  }
+                },
+                "required": [
+                  "name",
+                  "phoneNumber",
+                  "contactType"
+                ]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Контакт створено",
+            "description": "Contact created successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 201
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Contact created"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
@@ -190,9 +242,8 @@
         "tags": [
           "Contacts"
         ],
-        "summary": "Оновити контакт",
+        "summary": "Update contact by ID",
         "operationId": "updateContact",
-        "description": "Оновлює контакт за ID",
         "security": [
           {
             "bearerAuth": []
@@ -211,26 +262,68 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/CreateContactRequest"
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "phoneNumber": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "isFavourite": {
+                    "type": "boolean"
+                  },
+                  "contactType": {
+                    "type": "string",
+                    "enum": [
+                      "work",
+                      "home",
+                      "personal"
+                    ]
+                  },
+                  "photo": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Контакт оновлено",
+            "description": "Contact updated successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Contact"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Contact updated"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Contact"
+                    }
+                  }
                 }
               }
             }
           },
           "400": {
             "$ref": "#/components/responses/ValidationError"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -260,8 +353,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Contact deleted"
+          "204": {
+            "description": "Contact successfully deleted. No content is returned."
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
@@ -282,39 +375,58 @@
         "type": "object",
         "properties": {
           "_id": {
-            "type": "string"
+            "type": "string",
+            "example": "665f7ae507d0f9381ddcc723"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "John Doe"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "example": "+380931112233"
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "example": "john@example.com"
           },
-          "phone": {
-            "type": "string"
+          "isFavourite": {
+            "type": "boolean",
+            "example": false
+          },
+          "contactType": {
+            "type": "string",
+            "enum": [
+              "work",
+              "home",
+              "personal"
+            ],
+            "example": "personal"
+          },
+          "userId": {
+            "type": "string",
+            "example": "665f7ae507d0f9381ddcc711"
+          },
+          "photo": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/demo/image/upload/v1620000000/sample.jpg"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-05-01T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-05-10T14:30:00.000Z"
           }
         },
         "required": [
           "name",
-          "email"
-        ]
-      },
-      "CreateContactRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "email"
+          "phoneNumber",
+          "contactType",
+          "userId"
         ]
       }
     },

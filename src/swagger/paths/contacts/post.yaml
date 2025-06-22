@@ -1,22 +1,57 @@
 tags:
   - Contacts
-summary: Створити новий контакт
+summary: Create a new contact
 operationId: createContact
-description: Створює новий контакт
 security:
   - bearerAuth: []
 requestBody:
   required: true
   content:
-    application/json:
+    multipart/form-data:
       schema:
-        $ref: '../../components/schemas/CreateContactRequest.yaml'
+        type: object
+        properties:
+          name:
+            type: string
+            description: Contact's name
+          phoneNumber:
+            type: string
+            description: Contact's phone number
+          email:
+            type: string
+            description: Contact's email
+          isFavourite:
+            type: boolean
+            description: Is contact favourite
+          contactType:
+            type: string
+            enum: [work, home, personal]
+            description: Type of contact
+          photo:
+            type: string
+            format: binary
+            description: Contact's photo file
+        required:
+          - name
+          - phoneNumber
+          - contactType
 responses:
   '201':
-    description: Контакт створено
+    description: Contact created successfully
     content:
       application/json:
         schema:
-          $ref: '../../components/schemas/Contact.yaml'
+          type: object
+          properties:
+            status:
+              type: integer
+              example: 201
+            message:
+              type: string
+              example: Contact created
+            data:
+              $ref: ../../components/schemas/Contact.yaml
   '400':
     $ref: '../../components/responses/ValidationError.yaml'
+  '401':
+    description: Unauthorized
