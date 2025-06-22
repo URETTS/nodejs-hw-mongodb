@@ -1,0 +1,40 @@
+openapi: 3.0.0
+info:
+  title: Contacts API
+  version: 1.0.0
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://nodejs-hw-mongodb-qrqo.onrender.com
+tags:
+  - name: Contacts
+    description: Операції над контактами
+paths:
+  /contacts:
+    get:
+      $ref: './paths/contacts/get.yaml'
+    post:
+      $ref: './paths/contacts/post.yaml'
+  /contacts/{contactId}:
+    get:
+      $ref: './paths/contacts/{id}/get.yaml'
+    patch:
+      $ref: './paths/contacts/{id}/patch.yaml'
+    delete:
+      $ref: './paths/contacts/{id}/delete.yaml'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Contact:
+      $ref: './components/schemas/Contact.yaml'
+  responses:
+    NotFound:
+      $ref: './components/responses/NotFound.yaml'
+    ValidationError:
+      $ref: './components/responses/ValidationError.yaml'
+security:
+  - bearerAuth: []

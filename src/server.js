@@ -7,10 +7,20 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
 import authRouter from './routes/auth.js';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
 const PORT = process.env.PORT;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const swaggerPath = path.join(__dirname, '../docs/swagger.json');
+const swaggerDocument = JSON.parse(fs.readFileSync(swaggerPath, 'utf-8'));
 
 export const startServer = () => {
   const app = express();
@@ -28,19 +38,16 @@ export const startServer = () => {
   );
 
   app.use('/contacts', contactsRouter);
-
   app.use('/auth', authRouter);
 
   app.get('/', (req, res) => {
     res.send('API is working');
   });
 
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
   app.use(notFoundHandler);
-
-
   app.use(errorHandler);
-  
-
 
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
