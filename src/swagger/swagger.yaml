@@ -31,8 +31,6 @@ components:
   schemas:
     Contact:
       $ref: './components/schemas/Contact.yaml'
-    CreateContactRequest:
-      $ref: './components/schemas/CreateContactRequest.yaml'
   responses:
     NotFound:
       $ref: './components/responses/NotFound.yaml'

@@ -142,7 +142,7 @@
                         "data": {
                           "type": "array",
                           "items": {
-                            "$ref": "#/components/schemas/contact"
+                            "$ref": "#/components/schemas/Contact"
                           }
                         },
                         "page": {
@@ -269,7 +269,7 @@
                     },
                     "data": {
                       "type": "object",
-                      "$ref": "#/components/schemas/contact"
+                      "$ref": "#/components/schemas/Contact"
                     }
                   }
                 }
@@ -469,64 +469,6 @@
       }
     },
     "schemas": {
-      "contact": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string",
-            "example": "665f7ae507d0f9381ddcc723"
-          },
-          "name": {
-            "type": "string",
-            "example": "John Doe"
-          },
-          "phoneNumber": {
-            "type": "string",
-            "example": "+380931112233"
-          },
-          "email": {
-            "type": "string",
-            "example": "john@example.com"
-          },
-          "isFavourite": {
-            "type": "boolean",
-            "example": false
-          },
-          "contactType": {
-            "type": "string",
-            "enum": [
-              "work",
-              "home",
-              "personal"
-            ],
-            "example": "personal"
-          },
-          "userId": {
-            "type": "string",
-            "example": "665f7ae507d0f9381ddcc711"
-          },
-          "photo": {
-            "type": "string",
-            "example": "https://res.cloudinary.com/demo/image/upload/v1620000000/sample.jpg"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-05-01T12:00:00.000Z"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-05-10T14:30:00.000Z"
-          }
-        },
-        "required": [
-          "name",
-          "phoneNumber",
-          "contactType",
-          "userId"
-        ]
-      },
       "Contact": {
         "type": "object",
         "properties": {
