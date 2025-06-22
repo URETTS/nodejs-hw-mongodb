@@ -1,57 +1,67 @@
+summary: Create contact
+operationId: createContact
 tags:
   - Contacts
-summary: Create a new contact
-operationId: createContact
+description: 'Create a contact with payload'
 security:
   - bearerAuth: []
 requestBody:
-  required: true
   content:
     multipart/form-data:
       schema:
         type: object
-        properties:
-          name:
-            type: string
-            description: Contact's name
-          phoneNumber:
-            type: string
-            description: Contact's phone number
-          email:
-            type: string
-            description: Contact's email
-          isFavourite:
-            type: boolean
-            description: Is contact favourite
-          contactType:
-            type: string
-            enum: [work, home, personal]
-            description: Type of contact
-          photo:
-            type: string
-            format: binary
-            description: Contact's photo file
         required:
-          - name
+          - _id
           - phoneNumber
           - contactType
+          - userId
+        properties:
+          name:
+            description: "Contact's name"
+            type: string
+            example: 'John Doe'
+          phoneNumber:
+            description: "Contact's age"
+            type: string
+            example: '+38120005555'
+          contactType:
+            description: "Contact's type"
+            type: string
+            enum: ['work', 'home', 'personal']
+            default: 'personal'
+          email:
+            description: "Contact's email"
+            type: string
+            example: example@mail.com
+          isFavourite:
+            description: 'Whether is contact favourite'
+            type: boolean
+            default: false
+            example: false
+          photo:
+            description: "Contact's photo"
+            type: string
+            format: binary
 responses:
   '201':
-    description: Contact created successfully
+    description: Creates a contact
     content:
       application/json:
         schema:
           type: object
+          required:
+            - status
+            - message
+            - data
           properties:
             status:
               type: integer
               example: 201
             message:
               type: string
-              example: Contact created
+              example: Successfully created a contact!
             data:
-              $ref: ../../components/schemas/Contact.yaml
-  '400':
-    $ref: '../../components/responses/ValidationError.yaml'
+              type: object
+              $ref: '../../components/schemas/contact.yaml'
   '401':
-    description: Unauthorized
+    $ref: ../../components/responses/ValidationError.yaml
